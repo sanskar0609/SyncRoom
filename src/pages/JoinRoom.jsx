@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Users, Copy, Check } from 'lucide-react';
+import { Users, Copy, Check, Share2 } from 'lucide-react';
 import { roomService } from '../services/roomService';
 import { userService } from '../services/userService';
+import { shareRoom, getRoomShareUrl } from '../utils/share';
 
 export default function JoinRoom() {
     const { roomCode } = useParams();
@@ -42,10 +43,12 @@ export default function JoinRoom() {
         }
     };
 
-    const copyLink = () => {
-        navigator.clipboard.writeText(`${window.location.origin}/join/${code}`);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
+    const handleShareOrCopy = async () => {
+        const res = await shareRoom(code);
+        if (res.copied) {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        }
     };
 
     return (
@@ -61,14 +64,17 @@ export default function JoinRoom() {
                         <p className="text-gray-400 text-center mb-6">Share this link with your friends</p>
 
                         <div className="bg-background/50 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-4 mb-8">
-                            <span className="font-mono text-gray-300 truncate font-semibold">{`${window.location.host}/join/${code}`}</span>
-                            <button
-                                onClick={copyLink}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors shrink-0 text-white"
-                                title="Copy link"
-                            >
-                                {isCopied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5 text-gray-400" />}
-                            </button>
+                            <span className="font-mono text-gray-300 truncate text-sm select-all">{getRoomShareUrl(code)}</span>
+                            <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                    onClick={handleShareOrCopy}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white flex items-center gap-1.5 text-xs font-semibold bg-white/5"
+                                    title="Share or copy link"
+                                >
+                                    {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4 text-primary" />}
+                                    <span>{isCopied ? 'Copied!' : 'Share'}</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div className="text-center">

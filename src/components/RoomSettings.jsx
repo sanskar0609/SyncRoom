@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Settings, X, Copy, Check, Users, Shield, Edit2, Crown, Ban, AlertTriangle } from 'lucide-react';
+import { Settings, X, Copy, Check, Users, Shield, Edit2, Crown, Ban, AlertTriangle, Share2 } from 'lucide-react';
 import { supabase } from '../services/supabase';
+import { shareRoom, getRoomShareUrl } from '../utils/share';
 
 export default function RoomSettings({ room, currentUser, onlineUsers, onClose }) {
     const [activeTab, setActiveTab] = useState('general');
@@ -34,10 +35,12 @@ export default function RoomSettings({ room, currentUser, onlineUsers, onClose }
         setIsSaving(false);
     };
 
-    const copyLink = () => {
-        navigator.clipboard.writeText(`${window.location.origin}/join/${room.room_code}`);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
+    const handleShareOrCopy = async () => {
+        const res = await shareRoom(room.room_code, roomName);
+        if (res.copied) {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        }
     };
 
     const handleKickUser = async (userId) => {
@@ -122,11 +125,12 @@ export default function RoomSettings({ room, currentUser, onlineUsers, onClose }
                                     <input
                                         type="text"
                                         readOnly
-                                        value={`${window.location.origin}/join/${room.room_code}`}
-                                        className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none text-gray-400"
+                                        value={getRoomShareUrl(room.room_code)}
+                                        className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none text-gray-300 select-all"
                                     />
-                                    <button onClick={copyLink} className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                                        {isCopied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
+                                    <button onClick={handleShareOrCopy} className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center gap-1.5 px-3 text-xs font-semibold text-white">
+                                        {isCopied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4 text-primary" />}
+                                        <span>{isCopied ? 'Copied' : 'Share'}</span>
                                     </button>
                                 </div>
                             </div>

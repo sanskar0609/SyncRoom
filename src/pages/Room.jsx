@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { roomService } from '../services/roomService';
 import { userService } from '../services/userService';
 import { usePresence } from '../hooks/usePresence';
-import { Users, LogOut, Settings, Music, MessageCircle, ListMusic } from 'lucide-react';
+import { Users, LogOut, Settings, Music, MessageCircle, ListMusic, Share2, Check } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import Chat from '../components/Chat';
 import Queue from '../components/Queue';
@@ -11,6 +11,7 @@ import MusicPlayer from '../components/MusicPlayer';
 import ReactionBar from '../components/ReactionBar';
 import ReactionsOverlay from '../components/ReactionsOverlay';
 import RoomSettings from '../components/RoomSettings';
+import { shareRoom } from '../utils/share';
 
 export default function Room() {
     const { roomCode } = useParams();
@@ -23,9 +24,18 @@ export default function Room() {
     const [currentVideoId, setCurrentVideoId] = useState(null);
     const [showSettings, setShowSettings] = useState(false);
     const [mobileTab, setMobileTab] = useState('music'); // music, queue, chat, people
-
+    const [isShareCopied, setIsShareCopied] = useState(false);
 
     const isHost = room?.host_user_id === currentUser?.id;
+
+    const handleShareRoom = async () => {
+        if (!room) return;
+        const res = await shareRoom(room.room_code, room.name);
+        if (res.copied) {
+            setIsShareCopied(true);
+            setTimeout(() => setIsShareCopied(false), 2000);
+        }
+    };
 
     // Load user from local storage and verify they have a profile
     useEffect(() => {
@@ -159,11 +169,14 @@ export default function Room() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-panel rounded-xl border border-white/5 hidden sm:flex">
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-panel rounded-xl border border-white/5 hidden sm:flex">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        <span className="font-medium text-sm">{onlineUsers.length} online</span>
+                        <span className="font-medium text-xs">{onlineUsers.length} online</span>
                     </div>
+                    <button onClick={handleShareRoom} className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition-colors shrink-0 outline-none border border-transparent" title="Share Room Link">
+                        {isShareCopied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5 text-primary" />}
+                    </button>
                     {isHost && (
                         <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition-colors shrink-0 outline-none border border-transparent" title="Room Settings">
                             <Settings className="w-5 h-5" />
