@@ -31,3 +31,11 @@ dist-ssr
 
 # Vite
 *.tsbuildinfo
+
+# Mobile & APK
+*.apk
+android/build
+android/app/build
+android/.gradle
+build_err.txt
+

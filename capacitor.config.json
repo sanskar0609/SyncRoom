@@ -1,0 +1,9 @@
+{
+    "appId": "com.syncroom.app",
+    "appName": "SyncRoom",
+    "webDir": "dist",
+    "bundledWebRuntime": false,
+    "server": {
+        "androidScheme": "https"
+    }
+}
